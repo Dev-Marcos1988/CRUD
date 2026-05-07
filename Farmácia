@@ -1,0 +1,99 @@
+import os
+
+class Farmacia:
+    def __init__(self):
+        # Banco de dados inicial (Mock Data)
+        self.medicamentos = {
+            i: {"nome": f"Medicamento {i}", "preco": round(10.5 * i, 2), "estoque": 50} 
+            for i in range(1, 51)
+        }
+        self.proximo_id = 51
+
+    def limpar_tela(self):
+        # Limpa o console dependendo do SO (Windows ou Unix)
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+    def menu(self):
+        while True:
+            print("\n" + "="*30)
+            print("  SISTEMA DE GESTÃO FARMACÊUTICA")
+            print("="*30)
+            print("1. Listar Medicamentos")
+            print("2. Cadastrar Novo")
+            print("3. Atualizar Produto")
+            print("4. Registrar Saída (Venda)")
+            print("5. Excluir Registro")
+            print("0. Sair")
+            
+            opcao = input("\nSelecione uma opção: ")
+
+            try:
+                if opcao == '1': self.listar()
+                elif opcao == '2': self.cadastrar()
+                elif opcao == '3': self.atualizar()
+                elif opcao == '4': self.registrar_saida()
+                elif opcao == '5': self.excluir()
+                elif opcao == '0': 
+                    print("Encerrando sistema...")
+                    break
+                else: 
+                    print("\n⚠️ Opção inválida!")
+            except ValueError:
+                print("\n❌ Erro: Digite valores numéricos corretos para preço/estoque.")
+            except Exception as e:
+                print(f"\n❌ Ocorreu um erro inesperado: {e}")
+
+    def listar(self):
+        self.limpar_tela()
+        print(f"\n{'ID':<5} | {'Nome':<25} | {'Preço':<12} | {'Estoque':<8}")
+        print("-" * 60)
+        for mid, dados in self.medicamentos.items():
+            print(f"{mid:<5} | {dados['nome']:<25} | R${dados['preco']:>9.2f} | {dados['estoque']:>8}")
+        input("\nPressione Enter para voltar ao menu...")
+
+    def cadastrar(self):
+        nome = input("Nome do medicamento: ").strip()
+        if not nome: raise ValueError("O nome não pode ser vazio.")
+        
+        preco = float(input("Preço de venda: "))
+        estoque = int(input("Quantidade em estoque: "))
+        
+        self.medicamentos[self.proximo_id] = {"nome": nome, "preco": preco, "estoque": estoque}
+        print(f"\n✅ {nome} cadastrado com sucesso! ID: {self.proximo_id}")
+        self.proximo_id += 1
+
+    def atualizar(self):
+        mid = int(input("Digite o ID do medicamento para editar: "))
+        if mid in self.medicamentos:
+            print(f"Editando: {self.medicamentos[mid]['nome']}")
+            self.medicamentos[mid]['preco'] = float(input("Novo Preço: "))
+            self.medicamentos[mid]['estoque'] = int(input("Novo Estoque: "))
+            print("✅ Atualização concluída!")
+        else:
+            print("⚠️ ID não encontrado.")
+
+    def registrar_saida(self):
+        mid = int(input("ID do medicamento para venda/saída: "))
+        if mid in self.medicamentos:
+            qtd = int(input(f"Quantidade (Disponível: {self.medicamentos[mid]['estoque']}): "))
+            if 0 < qtd <= self.medicamentos[mid]['estoque']:
+                self.medicamentos[mid]['estoque'] -= qtd
+                print(f"✅ Venda realizada! Novo estoque: {self.medicamentos[mid]['estoque']}")
+            else:
+                print("⚠️ Quantidade inválida ou estoque insuficiente.")
+        else:
+            print("⚠️ ID não encontrado.")
+
+    def excluir(self):
+        mid = int(input("ID do medicamento para exclusão: "))
+        if mid in self.medicamentos:
+            confirmar = input(f"Tem certeza que deseja excluir {self.medicamentos[mid]['nome']}? (s/n): ")
+            if confirmar.lower() == 's':
+                del self.medicamentos[mid]
+                print("🗑️ Registro removido.")
+        else:
+            print("⚠️ ID não encontrado.")
+
+if __name__ == "__main__":
+    app = Farmacia()
+    app.menu()
